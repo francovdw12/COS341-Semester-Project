@@ -77,9 +77,9 @@ class SPLTypeChecker:
             self.visit(parse_tree)
             success = len(self.errors) == 0
             if success:
-                print("✓ Type checking passed! Program is correctly typed.")
+                print("[PASS] Type checking passed! Program is correctly typed.")
             else:
-                print(f"✗ Type checking failed with {len(self.errors)} errors")
+                print(f"[FAIL] Type checking failed with {len(self.errors)} errors")
             return success
         except Exception as e:
             self.add_error(f"Type checking failed: {e}")

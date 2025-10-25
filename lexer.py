@@ -40,15 +40,15 @@ class SPLLexer(Lexer):
             'return': 'RETURN', 'local': 'LOCAL', 'glob': 'GLOB', 'proc': 'PROC',
             'func': 'FUNC', 'main': 'MAIN', 'var': 'VAR', 'halt': 'HALT',
             'print': 'PRINT', 'while': 'WHILE', 'do': 'DO', 'until': 'UNTIL',
-            'if': 'IF', 'else': 'ELSE', 'eq': 'EQ', 'or': 'OR', 'and': 'AND',
+            'if': 'IF', 'else': 'ELSE', 'eq': 'EQ', 'gt': 'GT', 'or': 'OR', 'and': 'AND',
             'plus': 'PLUS', 'minus': 'MINUS', 'mult': 'MULT', 'div': 'DIV',
             'neg': 'NEG', 'not': 'NOT'
         }
         t.type = keywords.get(t.value, 'NAME')
         return t
 
-    # String literal: max 15 characters between quotes (digits or letters only)
-    @_(r'\"[a-zA-Z0-9]{0,15}\"')
+    # String literal: max 15 characters between quotes (letters, digits, and spaces)
+    @_(r'\"[a-zA-Z0-9 ]{0,15}\"')
     def STRING(self, t):
         t.value = t.value[1:-1]  # Remove quotes
         return t

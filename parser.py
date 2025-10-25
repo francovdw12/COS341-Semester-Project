@@ -105,15 +105,15 @@ class SPLParser(Parser):
     # The BODY contains local variables and algorithm (which may be empty conceptually)
     # ========================================================================
     
-    # Function with instructions before return
-    @_('name LPAREN param RPAREN LBRACE LOCAL LBRACE maxthree RBRACE instrs SEMICOLON RETURN atom RBRACE')
+    # Function definition with semicolon before return: NAME ( PARAM ) { BODY ; return TERM }
+    @_('name LPAREN param RPAREN LBRACE body SEMICOLON RETURN term RBRACE')
     def fdef(self, p):
-        return ('FDEF', p.name, p.param, ('BODY', p.maxthree, p.instrs), p.atom)
+        return ('FDEF', p.name, p.param, p.body, p.term)
     
-    # Function with no instructions before return (just local vars)
-    @_('name LPAREN param RPAREN LBRACE LOCAL LBRACE maxthree RBRACE RETURN atom RBRACE')
+    # Function definition without semicolon (when BODY has instructions that end with semicolon)
+    @_('name LPAREN param RPAREN LBRACE body RETURN term RBRACE')
     def fdef(self, p):
-        return ('FDEF', p.name, p.param, ('BODY', p.maxthree, []), p.atom)
+        return ('FDEF', p.name, p.param, p.body, p.term)
     
     # ========================================================================
     # BODY - Procedure body
@@ -195,6 +195,10 @@ class SPLParser(Parser):
     # ALGO ::= INSTR ; ALGO
     # ========================================================================
     
+    @_('empty')
+    def algo(self, p):
+        return []
+    
     @_('instr')
     def algo(self, p):
         return [p.instr]
@@ -236,6 +240,10 @@ class SPLParser(Parser):
     @_('branch')
     def instr(self, p):
         return p.branch
+    
+    @_('RETURN atom')
+    def instr(self, p):
+        return ('INSTR_RETURN', p.atom)
     
     # ========================================================================
     # ASSIGN - Assignment statements
