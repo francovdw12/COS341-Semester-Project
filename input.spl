@@ -1,199 +1,184 @@
-glob { 
-    counter 
-    maxvalue 
-    result 
-    sumresult 
-    maxnum 
-    multresult 
-    temp1 
-    temp2 
-    temp3 
-
+glob {
+  g1 g2 g3
+  status count maxv
+  res tmpA tmpB tmpC
 }
+
 proc {
-    displaycounter ( ) {
-        local { }
-        print counter;
-        print "counter"
-    }
+  show ( v ) {
+    local { }
+    print v
+  }
 
-    incrementcounter ( ) {
-        local { }
-        counter = ( counter plus 1 );
-        displaycounter ( )
-    }
+  ping ( ) {
+    local { }
+    print "ping"
+  }
 
-    resetcounter ( ) {
-        local { }
-        counter = 0;
-        print "reset"
-    }
-
-    calculateandstore ( a b c ) {
-        local { 
-            temp 
-            sum 
-        }
-        temp = ( a plus b );
-        sum = ( temp plus c );
-        sumresult = sum;
-        print "calculated";
-        print sumresult
-    }
-
-    findandstoremax ( x y ) {
-        local { }
-        if ( x > y ) {
-            maxnum = x;
-            print "maxx";
-            print x
-        } else {
-            maxnum = y;
-            print "maxy";
-            print y
-        }
-    }
-
-    multiplyandstore ( a b ) {
-        local { }
-        multresult = ( a mult b );
-        print "mult";
-        print multresult
-    }
-
-    complexcalculation ( x y z ) {
-        local { 
-            step1 
-            step2 
-            step3 
-        }
-        step1 = ( x plus y );
-        step2 = ( step1 mult z );
-        step3 = ( step2 minus x );
-        temp1 = step1;
-        temp2 = step2;
-        temp3 = step3;
-        print "step1";
-        print step1;
-        print "step2";
-        print step2;
-        print "step3";
-        print step3
-    }
-
-    nestedprocedure ( a b ) {
-        local { 
-            inner1 
-            inner2 
-        }
-        inner1 = ( a plus b );
-        inner2 = ( inner1 mult 2 );
-        print "inner1";
-        print inner1;
-        print "inner2";
-        print inner2;
-        if ( inner1 > inner2 ) {
-            print "inner1bigger";
-            print inner1
-        } else {
-            print "inner2bigger";
-            print inner2
-        }
-    }
-}
-func {
-    calculatesum ( a b c ) {
-        local { 
-            temp 
-            sum 
-        }
-        temp = ( a plus b );
-        sum = ( temp plus c );
-        return sum
-    }
-
-    multiply ( a b ) {
-        local { result }
-        result = ( a mult b );
-        return result
-    }
-
-    factorial ( n ) {
-        local { 
-            fact 
-            i 
-        }
-        fact = 1;
-        i = 1;
-        while ( i > 0 ) {
-            fact = ( fact mult i );
-            i = ( i minus 1 )
-        };
-        return fact
-    }
-
-    power ( base exp ) {
-        local { 
-            result 
-            count 
-        }
-        result = 1;
-        count = 0;
-        while ( count > 0 ) {
-            result = ( result mult base );
-            count = ( count minus 1 )
-        };
-        return result
-    }
-
-}
-main {
-    var { 
-        num1 
-        num2 
-        num3 
-        loopcount 
-        testvar1 
-        testvar2 
-        testvar3 
-        funcresult1 
-        funcresult2 
-        funcresult3 
-        funcresult4 
-    }
-    counter = 0;
-    maxvalue = 100;
-    num1 = 15;
-    num2 = 25;
-    num3 = 35;
-    testvar1 = 10;
-    testvar2 = 20;
-    testvar3 = 30;
-    calculateandstore ( num1 num2 num3 );
-    findandstoremax ( num1 num2 );
-    multiplyandstore ( num1 num2 );
-    complexcalculation ( testvar1 testvar2 testvar3 );
-    nestedprocedure ( num1 num2 );
-    funcresult1 = calculatesum ( num1 num2 num3 );
-    funcresult2 = multiply ( num1 num2 );
-    funcresult3 = factorial ( 5 );
-    funcresult4 = power ( 2 3 );
-    print "funcsum";
-    print funcresult1;
-    print "funcmult";
-    print funcresult2;
-    print "funcfact";
-    print funcresult3;
-    print "funcpower";
-    print funcresult4;
-    loopcount = 0;
-    while ( loopcount > 0 ) {
-        incrementcounter ( );
-        loopcount = ( loopcount minus 1 )
+  countDownUnlessTwo ( start dummy ) {
+    local { i }
+    i = start;
+    while ( ( i > 0 ) and ( not ( i eq 2 ) ) ) {
+      print i;
+      i = ( i minus 1 )
     };
-    result = ( sumresult mult maxnum );
-    print "final";
-    print result;
-    resetcounter ( );
-    halt
+    print "doneWhile"
+  }
+
+  triProc ( a b c ) {
+    local { s m }
+    s = ( a plus b );
+    s = ( s plus c );
+    m = ( a mult b );
+    print s;
+    print m;
+    show ( c )
+  }
+
+  compareAndLog ( x y ) {
+    local { }
+    if ( x > y ) {
+      print "gt";
+      print x
+    } else {
+      if ( x eq y ) {
+        print "eq";
+        print y
+      } else {
+        print "lt";
+        print y
+      }
+    }
+  }
+}
+
+func {
+  max2 ( a b ) {
+    local { r }
+    r = a;
+    if ( a > b ) {
+      r = a
+    } else {
+      r = b
+    };
+    return r
+  }
+
+  clamp ( x lo hi ) {
+    local { r }
+    r = x;
+    if ( r > hi ) {
+      r = hi
+    } else {
+      if ( lo > r ) {
+        r = lo
+      } else {
+        r = r
+      }
+    };
+    return r
+  }
+
+  sum3 ( a b c ) {
+    local { s }
+    s = ( a plus b );
+    s = ( s plus c );
+    return s
+  }
+
+  diffneg ( u ) {
+    local { d }
+    d = ( neg u );
+    return d
+  }
+
+  mixlogic ( a b c ) {
+    local { r }
+    r = a;
+    if ( ( ( a > b ) and ( not ( b eq c ) ) ) or ( a eq c ) ) {
+      r = ( a plus b )
+    } else {
+      r = ( a minus c )
+    };
+    return r
+  }
+
+  repeatMul ( base times ) {
+    local { acc t }
+    acc = 1;
+    t = times;
+    while ( t > 0 ) {
+      acc = ( acc mult base );
+      t = ( t minus 1 )
+    };
+    return acc
+  }
+}
+
+main {
+  var {
+    x y z
+    u v w
+    a b c
+    r1 r2 r3 r4 r5 r6
+    loopc
+  }
+
+  print "start";
+  x = 7;
+  y = 3;
+  z = ( x plus y );
+  u = ( ( x mult y ) );
+  v = ( ( x minus y ) );
+  w = ( ( u div y ) );
+
+  ping ( );
+  show ( z );
+  triProc ( x y z );
+  compareAndLog ( x y );
+
+  r1 = max2 ( x y );
+  r2 = clamp ( z 5 12 );
+  r3 = sum3 ( x y z );
+  r4 = diffneg ( y );
+  r5 = mixlogic ( x y z );
+  r6 = repeatMul ( 2 5 );
+
+  print r1;
+  print r2;
+  print r3;
+  print r4;
+  print r5;
+  print r6;
+
+  loopc = 3;
+  while ( loopc > 0 ) {
+    print loopc;
+    loopc = ( loopc minus 1 )
+  };
+
+  do {
+    y = ( y plus 1 )
+  } until ( y eq 10 );
+
+  print y;
+
+  if ( ( x > y ) or ( ( z eq 10 ) and ( not ( v eq 4 ) ) ) ) {
+    print "branchT"
+  } else {
+    print "branchF"
+  };
+
+  a = ( ( ( x plus y ) mult ( z minus 2 ) ) );
+  b = ( ( a div 5 ) );
+  c = ( ( neg b ) );
+
+  print a;
+  print b;
+  print c;
+
+  countDownUnlessTwo ( 5 0 );
+
+  print "end";
+  halt
 }
