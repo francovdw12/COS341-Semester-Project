@@ -1,0 +1,199 @@
+glob { 
+    counter 
+    maxvalue 
+    result 
+    sumresult 
+    maxnum 
+    multresult 
+    temp1 
+    temp2 
+    temp3 
+
+}
+proc {
+    displaycounter ( ) {
+        local { }
+        print counter;
+        print "counter"
+    }
+
+    incrementcounter ( ) {
+        local { }
+        counter = ( counter plus 1 );
+        displaycounter ( )
+    }
+
+    resetcounter ( ) {
+        local { }
+        counter = 0;
+        print "reset"
+    }
+
+    calculateandstore ( a b c ) {
+        local { 
+            temp 
+            sum 
+        }
+        temp = ( a plus b );
+        sum = ( temp plus c );
+        sumresult = sum;
+        print "calculated";
+        print sumresult
+    }
+
+    findandstoremax ( x y ) {
+        local { }
+        if ( x > y ) {
+            maxnum = x;
+            print "maxx";
+            print x
+        } else {
+            maxnum = y;
+            print "maxy";
+            print y
+        }
+    }
+
+    multiplyandstore ( a b ) {
+        local { }
+        multresult = ( a mult b );
+        print "mult";
+        print multresult
+    }
+
+    complexcalculation ( x y z ) {
+        local { 
+            step1 
+            step2 
+            step3 
+        }
+        step1 = ( x plus y );
+        step2 = ( step1 mult z );
+        step3 = ( step2 minus x );
+        temp1 = step1;
+        temp2 = step2;
+        temp3 = step3;
+        print "step1";
+        print step1;
+        print "step2";
+        print step2;
+        print "step3";
+        print step3
+    }
+
+    nestedprocedure ( a b ) {
+        local { 
+            inner1 
+            inner2 
+        }
+        inner1 = ( a plus b );
+        inner2 = ( inner1 mult 2 );
+        print "inner1";
+        print inner1;
+        print "inner2";
+        print inner2;
+        if ( inner1 > inner2 ) {
+            print "inner1bigger";
+            print inner1
+        } else {
+            print "inner2bigger";
+            print inner2
+        }
+    }
+}
+func {
+    calculatesum ( a b c ) {
+        local { 
+            temp 
+            sum 
+        }
+        temp = ( a plus b );
+        sum = ( temp plus c );
+        return sum
+    }
+
+    multiply ( a b ) {
+        local { result }
+        result = ( a mult b );
+        return result
+    }
+
+    factorial ( n ) {
+        local { 
+            fact 
+            i 
+        }
+        fact = 1;
+        i = 1;
+        while ( i > 0 ) {
+            fact = ( fact mult i );
+            i = ( i minus 1 )
+        };
+        return fact
+    }
+
+    power ( base exp ) {
+        local { 
+            result 
+            count 
+        }
+        result = 1;
+        count = 0;
+        while ( count > 0 ) {
+            result = ( result mult base );
+            count = ( count minus 1 )
+        };
+        return result
+    }
+
+}
+main {
+    var { 
+        num1 
+        num2 
+        num3 
+        loopcount 
+        testvar1 
+        testvar2 
+        testvar3 
+        funcresult1 
+        funcresult2 
+        funcresult3 
+        funcresult4 
+    }
+    counter = 0;
+    maxvalue = 100;
+    num1 = 15;
+    num2 = 25;
+    num3 = 35;
+    testvar1 = 10;
+    testvar2 = 20;
+    testvar3 = 30;
+    calculateandstore ( num1 num2 num3 );
+    findandstoremax ( num1 num2 );
+    multiplyandstore ( num1 num2 );
+    complexcalculation ( testvar1 testvar2 testvar3 );
+    nestedprocedure ( num1 num2 );
+    funcresult1 = calculatesum ( num1 num2 num3 );
+    funcresult2 = multiply ( num1 num2 );
+    funcresult3 = factorial ( 5 );
+    funcresult4 = power ( 2 3 );
+    print "funcsum";
+    print funcresult1;
+    print "funcmult";
+    print funcresult2;
+    print "funcfact";
+    print funcresult3;
+    print "funcpower";
+    print funcresult4;
+    loopcount = 0;
+    while ( loopcount > 0 ) {
+        incrementcounter ( );
+        loopcount = ( loopcount minus 1 )
+    };
+    result = ( sumresult mult maxnum );
+    print "final";
+    print result;
+    resetcounter ( );
+    halt
+}
