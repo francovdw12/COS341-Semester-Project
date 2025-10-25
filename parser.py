@@ -9,6 +9,16 @@ The grammar is not in LL(1) format, so we use SLY's LR parser.
 from sly import Parser
 from lexer import SPLLexer
 
+# Global counter for unique node IDs
+_node_id_counter = 1
+
+def get_next_node_id():
+    """Get the next unique node ID"""
+    global _node_id_counter
+    node_id = _node_id_counter
+    _node_id_counter += 1
+    return node_id
+
 
 class SPLParser(Parser):
     # Get the token list from the lexer
@@ -32,7 +42,8 @@ class SPLParser(Parser):
     
     @_('GLOB LBRACE variables RBRACE PROC LBRACE procdefs RBRACE FUNC LBRACE funcdefs RBRACE MAIN LBRACE mainprog RBRACE')
     def spl_prog(self, p):
-        return ('SPL_PROG', p.variables, p.procdefs, p.funcdefs, p.mainprog)
+        node_id = get_next_node_id()
+        return ('SPL_PROG', node_id, p.variables, p.procdefs, p.funcdefs, p.mainprog)
     
     # ========================================================================
     # VARIABLES - Global or local variable declarations
@@ -56,11 +67,13 @@ class SPLParser(Parser):
     
     @_('NAME')
     def var(self, p):
-        return ('VAR', p.NAME)
+        node_id = get_next_node_id()
+        return ('VAR', node_id, p.NAME)
     
     @_('NAME')
     def name(self, p):
-        return ('NAME', p.NAME)
+        node_id = get_next_node_id()
+        return ('NAME', node_id, p.NAME)
     
     # ========================================================================
     # PROCDEFS - Procedure definitions
@@ -83,7 +96,8 @@ class SPLParser(Parser):
     
     @_('name LPAREN param RPAREN LBRACE body RBRACE')
     def pdef(self, p):
-        return ('PDEF', p.name, p.param, p.body)
+        node_id = get_next_node_id()
+        return ('PDEF', node_id, p.name, p.param, p.body)
     
     # ========================================================================
     # FUNCDEFS - Function definitions
@@ -108,12 +122,14 @@ class SPLParser(Parser):
     # Function with instructions before return
     @_('name LPAREN param RPAREN LBRACE LOCAL LBRACE maxthree RBRACE instrs SEMICOLON RETURN atom RBRACE')
     def fdef(self, p):
-        return ('FDEF', p.name, p.param, ('BODY', p.maxthree, p.instrs), p.atom)
+        node_id = get_next_node_id()
+        return ('FDEF', node_id, p.name, p.param, ('BODY', p.maxthree, p.instrs), p.atom)
     
     # Function with no instructions before return (just local vars)
     @_('name LPAREN param RPAREN LBRACE LOCAL LBRACE maxthree RBRACE RETURN atom RBRACE')
     def fdef(self, p):
-        return ('FDEF', p.name, p.param, ('BODY', p.maxthree, []), p.atom)
+        node_id = get_next_node_id()
+        return ('FDEF', node_id, p.name, p.param, ('BODY', p.maxthree, []), p.atom)
     
     # ========================================================================
     # BODY - Procedure body
@@ -122,7 +138,8 @@ class SPLParser(Parser):
     
     @_('LOCAL LBRACE maxthree RBRACE algo')
     def body(self, p):
-        return ('BODY', p.maxthree, p.algo)
+        node_id = get_next_node_id()
+        return ('BODY', node_id, p.maxthree, p.algo)
     
     # Helper for building instruction sequences without consuming final semicolon
     @_('instr')
@@ -140,7 +157,8 @@ class SPLParser(Parser):
     
     @_('maxthree')
     def param(self, p):
-        return ('PARAM', p.maxthree)
+        node_id = get_next_node_id()
+        return ('PARAM', node_id, p.maxthree)
     
     # ========================================================================
     # MAXTHREE - Up to three variables
@@ -173,7 +191,8 @@ class SPLParser(Parser):
     
     @_('VAR LBRACE variables RBRACE algo')
     def mainprog(self, p):
-        return ('MAINPROG', p.variables, p.algo)
+        node_id = get_next_node_id()
+        return ('MAINPROG', node_id, p.variables, p.algo)
     
     # ========================================================================
     # ATOM - Basic values (variables or numbers)
@@ -183,11 +202,13 @@ class SPLParser(Parser):
     
     @_('var')
     def atom(self, p):
-        return ('ATOM_VAR', p.var)
+        node_id = get_next_node_id()
+        return ('ATOM_VAR', node_id, p.var)
     
     @_('NUMBER')
     def atom(self, p):
-        return ('ATOM_NUM', p.NUMBER)
+        node_id = get_next_node_id()
+        return ('ATOM_NUM', node_id, p.NUMBER)
     
     # ========================================================================
     # ALGO - Algorithm (sequence of instructions)
