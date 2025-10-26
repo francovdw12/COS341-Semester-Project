@@ -3,6 +3,9 @@ Test suite for SPL Lexer and Parser
 Simple tests for commit-ready verification
 """
 
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from lexer import SPLLexer
 from parser import parse_spl
 
@@ -15,25 +18,25 @@ def test_lexer():
     # Test keywords
     tokens = list(lexer.tokenize("glob proc func main var halt"))
     assert len(tokens) == 6
-    print("✓ Keywords recognized")
+    print("+ Keywords recognized")
     
     # Test identifiers
     tokens = list(lexer.tokenize("x abc test123"))
     assert len(tokens) == 3
     assert all(t.type == 'NAME' for t in tokens)
-    print("✓ Identifiers recognized")
+    print("+ Identifiers recognized")
     
     # Test numbers
     tokens = list(lexer.tokenize("0 123 456"))
     assert len(tokens) == 3
     assert all(t.type == 'NUMBER' for t in tokens)
-    print("✓ Numbers recognized")
+    print("+ Numbers recognized")
     
     # Test strings
     tokens = list(lexer.tokenize('"hello" "test123"'))
     assert len(tokens) == 2
     assert all(t.type == 'STRING' for t in tokens)
-    print("✓ Strings recognized")
+    print("+ Strings recognized")
     
     print()
 
@@ -50,7 +53,7 @@ main {
 }"""
     ast = parse_spl(code)
     assert ast is not None
-    print("✓ Minimal program parsed")
+    print("+ Minimal program parsed")
 
 
 def test_parser_with_variables():
@@ -67,7 +70,7 @@ main {
 }"""
     ast = parse_spl(code)
     assert ast is not None
-    print("✓ Variables and assignments parsed")
+    print("+ Variables and assignments parsed")
 
 
 def test_parser_with_print():
@@ -83,7 +86,7 @@ main {
 }"""
     ast = parse_spl(code)
     assert ast is not None
-    print("✓ Print statements parsed")
+    print("+ Print statements parsed")
 
 
 def test_parser_with_function():
@@ -104,7 +107,7 @@ main {
 }"""
     ast = parse_spl(code)
     assert ast is not None
-    print("✓ Function definition and call parsed")
+    print("+ Function definition and call parsed")
 
 
 def test_parser_complex():
@@ -131,7 +134,7 @@ main {
 }"""
     ast = parse_spl(code)
     assert ast is not None
-    print("✓ Complex program parsed")
+    print("+ Complex program parsed")
 
 
 if __name__ == '__main__':
@@ -149,5 +152,5 @@ if __name__ == '__main__':
     
     print()
     print("="*60)
-    print("✓✓✓ ALL TESTS PASSED ✓✓✓")
+    print("+++ ALL TESTS PASSED +++")
     print("="*60)
