@@ -23,5 +23,5 @@
 ## NOTES
 * Pretty sure we can remove ```typechecker.py``` and ```test_typechecker.py```.
 * Not sure if we need to remove all test code for final submission... Probably?
-* The ```codegen.py``` file can potentially also be removed since the inline version is suppsoed to be the correct version, but then we have to double check that ```codegen.py``` isn't used anywhere.
+* The ```codegen.py``` file can potentially also be removed since the inline version is supposed to be the correct version, but then we have to double check that ```codegen.py``` isn't used anywhere.
 * We need to check out the code and fix stuff like random test code at the bottom of files, unnecessary comments, stuff like that
