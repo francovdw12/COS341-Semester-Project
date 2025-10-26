@@ -23,7 +23,7 @@ funcmult
 funcfact
  120 
 funcpower
- 8 
+ 1 
 final
  1875 
 reset
