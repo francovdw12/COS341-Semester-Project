@@ -1,0 +1,8 @@
+a = 5
+b = 10
+c = 15
+result = CALL add(a, b)
+CALL display(result)
+result = CALL maximum(b, c)
+CALL display(result)
+STOP

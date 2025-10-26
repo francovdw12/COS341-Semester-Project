@@ -1,0 +1,12 @@
+a = 7
+b = 12
+// Local variables: result
+IF (a > b) = 1 THEN L_THEN
+result = b
+GOTO L_EXIT
+REM L_THEN
+result = a
+REM L_EXIT
+maxval = result
+PRINT maxval
+STOP

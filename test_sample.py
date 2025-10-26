@@ -1,19 +1,25 @@
 """
-Test a sample SPL program through all three compiler phases:
+Test a sample SPL program through all six compiler phases:
 1. Lexer (tokenization)
 2. Parser (syntax analysis) 
 3. Scope Analyzer (semantic analysis)
+4. Type Checker (type analysis)
+5. Code Generator (intermediate code generation)
+6. Inliner (CALL instruction inlining)
 """
 
 from lexer import SPLLexer
 from parser import parse_spl
 from semantic_analyzer import analyze_spl_semantics, print_semantic_errors, ScopeAnalyzer
+from type_checker import check_spl_types, print_type_errors
+from code_generator import generate_intermediate_code
+from inliner import inline_intermediate_code
 
 def test_sample_program():
-    """Test a sample SPL program through all three phases."""
+    """Test a sample SPL program through all six phases."""
     
     # Comprehensive SPL program with multiple procedures and variables
-    sample_code = """
+    sample_code =  """
     glob { 
         counter 
         maxvalue 
@@ -140,7 +146,7 @@ def test_sample_program():
                 i 
             }
             fact = 1;
-            i = 1;
+            i = n;
             while ( i > 0 ) {
                 fact = ( fact mult i );
                 i = ( i minus 1 )
@@ -214,9 +220,106 @@ def test_sample_program():
         halt
     }
     """
+
+    # # TEST 1
+    # #===================================================================
+    # sample_code = """
+    # glob { total }
+    # proc { }
+    # func {
+    #     add ( x y ) {
+    #         local { result }
+    #         result = ( x plus y );
+    #         return result
+    #     }
+    # }
+    # main {
+    #     var { a b }
+    #     a = 10;
+    #     b = 20;
+    #     total = add ( a b );
+    #     print total;
+    #     halt
+    # }
+
+    # """
+
+    # # TEST 2
+    # #===================================================================
+    # sample_code = """
+    # glob {
+    # }
+
+    # proc {
+    # }
+
+    # func {
+    #     testfunc(a) {
+    #         local { }
+    #         return a
+    #     }
+    # }
+
+    # main {
+    #     var { x y }
+    #     x = 5;
+    #     y = testfunc(x);
+    #     print y;
+    #     halt
+    # }
+    # """
+
+# #     # TEST 3
+# #     #===================================================================
+#     sample_code = """
+#     glob { total }
+#     proc { }
+#     func {
+#         add ( x y ) {
+#             local { result }
+#             result = ( x plus y );
+#             return result
+#         }
+#     }
+#     main {
+#         var { a b }
+#         a = 10;
+#         b = 20;
+#         total = add ( a b );
+#         print total;
+#         halt
+#     }
+#     """
+
+    # TEST 4
+    #===================================================================
+    sample_code = """
+    glob { maxval }
+    proc { }
+    func {
+        findmaximum ( x y ) {
+            local { result }
+            if ( x > y ) {
+                result = x
+            } else {
+                result = y
+            };
+            return result
+        }
+    }
+
+    main {
+        var { a b }
+        a = 7;
+        b = 12;
+        maxval = findmaximum ( a b );
+        print maxval;
+        halt
+    }
+    """
     
     print("=" * 80)
-    print("SPL COMPILER - THREE PHASE TEST")
+    print("SPL COMPILER - SIX PHASE TEST")
     print("=" * 80)
     print("\nSample Program:")
     print(sample_code)
@@ -266,6 +369,65 @@ def test_sample_program():
         print_semantic_errors(errors)
         return False
     
+    # Phase 4: Type Checker (Type Analysis)
+    print("\nPHASE 4: TYPE CHECKER (Type Analysis)")
+    print("-" * 40)
+    
+    # Check types using the symbol table from scope analysis
+    type_success, type_errors = check_spl_types(parse_tree, analyzer.symbol_table)
+    
+    if type_success:
+        print("OK: Type analysis passed!")
+        print_type_errors(type_errors)
+    else:
+        print("FAIL: Type analysis failed!")
+        print_type_errors(type_errors)
+        return False
+    
+    # Phase 5: Code Generator (Intermediate Code Generation)
+    print("\nPHASE 5: CODE GENERATOR (Intermediate Code Generation)")
+    print("-" * 40)
+    
+    try:
+        intermediate_code = generate_intermediate_code(parse_tree, analyzer.symbol_table, "sample_intermediate.txt")
+        
+        if intermediate_code:
+            print("OK: Code generation successful!")
+            print("\nGenerated Intermediate Code (with CALL instructions):")
+            print("-" * 50)
+            print(intermediate_code)
+            print("-" * 50)
+            print(f"Intermediate code saved to: sample_intermediate.txt")
+        else:
+            print("FAIL: Code generation failed!")
+            return False
+            
+    except Exception as e:
+        print(f"FAIL: Code generation error: {str(e)}")
+        return False
+    
+    # Phase 6: Inliner (Replace CALL instructions with inlined code)
+    print("\nPHASE 6: INLINER (Replace CALL with inlined code)")
+    print("-" * 40)
+    
+    try:
+        inlined_code = inline_intermediate_code(parse_tree, analyzer.symbol_table, intermediate_code, "sample_inlined.txt")
+        
+        if inlined_code:
+            print("OK: Inlining successful!")
+            print("\nInlined Code (CALL instructions replaced):")
+            print("-" * 50)
+            print(inlined_code)
+            print("-" * 50)
+            print(f"Inlined code saved to: sample_inlined.txt")
+        else:
+            print("FAIL: Inlining failed!")
+            return False
+            
+    except Exception as e:
+        print(f"FAIL: Inlining error: {str(e)}")
+        return False
+    
     # Display Symbol Table
     print("\nSYMBOL TABLE:")
     print("-" * 40)
@@ -289,13 +451,17 @@ def test_sample_program():
     
     # Summary
     print("\n" + "=" * 80)
-    print("SUMMARY")
+    print("SIX PHASE COMPILER SUMMARY")
     print("=" * 80)
     print("OK: Phase 1 (Lexer): Tokenization successful")
     print("OK: Phase 2 (Parser): Syntax analysis successful") 
     print("OK: Phase 3 (Scope Analyzer): Semantic analysis successful")
-    print("\nSUCCESS: ALL THREE PHASES COMPLETED SUCCESSFULLY!")
-    print("Your SPL program is syntactically and semantically correct.")
+    print("OK: Phase 4 (Type Checker): Type analysis successful")
+    print("OK: Phase 5 (Code Generator): Intermediate code generation successful")
+    print("OK: Phase 6 (Inliner): CALL instruction inlining successful")
+    print("\nSUCCESS: ALL SIX PHASES COMPLETED SUCCESSFULLY!")
+    print("Your SPL program has been fully compiled with inlined code.")
+    print("All CALL instructions have been replaced with actual function/procedure code!")
     print("=" * 80)
     
     return True

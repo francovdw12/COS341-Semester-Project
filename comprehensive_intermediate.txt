@@ -1,0 +1,14 @@
+a = 3
+b = 7
+c = 5
+d = 9
+total = 0
+maxval = CALL findmax(a, b, c)
+CALL showresult(maxval)
+a = CALL square(b)
+CALL showresult(a)
+b = CALL addnumbers(c, d)
+CALL showresult(b)
+CALL incrementcounter()
+CALL showresult(total)
+STOP

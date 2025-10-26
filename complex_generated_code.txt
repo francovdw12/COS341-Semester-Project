@@ -1,0 +1,18 @@
+a = 5
+b = 10
+c = 15
+d = 20
+result = CALL calculate(a, b)
+PRINT result
+result = CALL maximum(c, d)
+PRINT result
+counter = 0
+REM L1
+IF (counter > 0) = 0 THEN L2
+CALL increment()
+PRINT counter
+GOTO L1
+REM L2
+CALL reset()
+PRINT counter
+STOP

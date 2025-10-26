@@ -1,0 +1,17 @@
+a = 5
+b = 10
+c = 15
+// Local variables: temp
+temp = (a + b)
+result = temp
+PRINT result
+// Local variables: result
+IF (b > c) = 1 THEN L_THEN
+result = c
+GOTO L_EXIT
+REM L_THEN
+result = b
+REM L_EXIT
+result = result
+PRINT result
+STOP

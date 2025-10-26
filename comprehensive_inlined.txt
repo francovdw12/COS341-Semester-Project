@@ -1,0 +1,31 @@
+a = 3
+b = 7
+c = 5
+d = 9
+total = 0
+// Local variables: temp
+IF (a > b) = 1 THEN L_THEN
+temp = b
+GOTO L_EXIT
+REM L_THEN
+temp = a
+REM L_EXIT
+IF (temp > c) = 1 THEN L_THEN
+temp = c
+GOTO L_EXIT
+REM L_THEN
+temp = temp
+REM L_EXIT
+maxval = temp
+PRINT maxval
+// Local variables: result
+result = (b * b)
+a = result
+PRINT a
+// Local variables: sum
+sum = (c + d)
+b = sum
+PRINT b
+total = (total + 1)
+PRINT total
+STOP
