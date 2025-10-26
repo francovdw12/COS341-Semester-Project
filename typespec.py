@@ -1,9 +1,10 @@
+# Performs type checking for our compiler
+
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 NUM, BOOL = 'numeric', 'boolean'
 
-# ---------------------- small AST helpers ----------------------
-
+#  small AST helpers 
 def _lin(node: Any) -> Optional[int]:
     """Best-effort line extraction for helpful messages."""
     if isinstance(node, tuple):
@@ -27,27 +28,25 @@ def _nametext(name_node: Tuple[str, str, int]) -> str:
 def _varlist_names(var_list: List[Tuple[str, str, int]]) -> List[str]:
     return [_varname(v) for v in var_list]
 
-# ---------------------- Type Analyser (spec-faithful) ----------------------
-
+# Type Analyser
 class TypeAnalyserSpec:
     """Implements the worksheet's type attributions over the SPL AST."""
     def __init__(self, ast: Tuple):
         self.ast = ast
         self.errors: List[str] = []
 
-        # For NAME typeless checks and (optional) arity checks:
-        self.vars_all: Set[str] = set()        # every declared variable name (any scope)
-        self.procs: Dict[str, Dict] = {}       # name -> {'params': [...], 'locals': [...], 'algo': [...]}
-        self.funcs: Dict[str, Dict] = {}       # name -> {'params': [...], 'locals': [...], 'algo': [...], 'ret': atom}
+        # For NAME typeless checks:
+        self.vars_all: Set[str] = set() # every declared variable name (any scope)
+        self.procs: Dict[str, Dict] = {} # name -> {'params': [...], 'locals': [...], 'algo': [...]}
+        self.funcs: Dict[str, Dict] = {} # name -> {'params': [...], 'locals': [...], 'algo': [...], 'ret': atom}
         self.globals: Set[str] = set()
         self.main_vars: Set[str] = set()
 
-        # Optional: store node -> inferred kind to let users inspect types.
-        self.node_type: Dict[int, str] = {}    # id(node) -> 'numeric' | 'boolean'
+        self.node_type: Dict[int, str] = {} # id(node) -> 'numeric' | 'boolean'
 
         self._collect_symbols()
 
-    # ---------- symbol collection (for NAME typeless + arity hints) ----------
+    # symbol collection (for NAME typeless + arity hints)
     def _collect_symbols(self) -> None:
         if not (isinstance(self.ast, tuple) and self.ast and self.ast[0] == 'SPL_PROG'):
             self.errors.append("Internal: AST top-level is not SPL_PROG")
@@ -85,12 +84,12 @@ class TypeAnalyserSpec:
         self.main_vars = set(_varlist_names(mainprog[1]))
         self.vars_all |= self.main_vars
 
-    # ---------- annotation helper ----------
+    # annotation helper
     def _note(self, node: Any, ty: str) -> None:
         if isinstance(node, tuple):
             self.node_type[id(node)] = ty
 
-    # ---------- typing primitives ----------
+    # typing primitives
     def _type_atom(self, atom: Tuple) -> str:
         # ATOM ::= VAR | number
         if atom[0] == 'ATOM_VAR':
@@ -169,12 +168,11 @@ class TypeAnalyserSpec:
         self.errors.append("Type error: invalid OUTPUT")
 
     def _check_input(self, atoms: List[Tuple]) -> None:
-        # INPUT ::= ε | ATOM | ATOM ATOM | ATOM ATOM ATOM — all numeric
         for a in atoms:
             if self._type_atom(a) != NUM:
                 self.errors.append(f"Type error: input atom must be numeric at line { _lin(a) }")
 
-    # ---------- instructions & algorithms ----------
+    # instructions & algorithms
     def _check_instr(self, instr: Tuple) -> None:
         tag = instr[0]
 
@@ -186,8 +184,7 @@ class TypeAnalyserSpec:
             return
 
         if tag == 'INSTR_CALL':
-            # NAME ( INPUT )  — NAME must be typeless (i.e., not a variable name),
-            # and must be a procedure (for sanity).
+            # NAME ( INPUT )
             name_node, args = instr[1], instr[2]
             callee = _nametext(name_node)
             if callee in self.vars_all:
@@ -209,7 +206,7 @@ class TypeAnalyserSpec:
             return
 
         if tag == 'ASSIGN_CALL':
-            # VAR = NAME ( INPUT )  — NAME typeless and a function; VAR numeric (fact)
+            # VAR = NAME ( INPUT ) NAME typeless and a function; VAR numeric (fact)
             var_node, name_node, args = instr[1], instr[2], instr[3]
             fname = _nametext(name_node)
             if fname in self.vars_all:
@@ -230,7 +227,7 @@ class TypeAnalyserSpec:
             return
 
         if tag == 'ASSIGN_TERM':
-            # VAR = TERM — both numeric
+            # VAR = TERM - both numeric
             _lhs, term = instr[1], instr[2]
             t = self._type_term(term)
             if t != NUM:
@@ -272,9 +269,9 @@ class TypeAnalyserSpec:
         for instr in algo:
             self._check_instr(instr)
 
-    # ---------- node-level wrappers ----------
+    # node-level wrappers
     def _check_param(self, param_node: Tuple) -> None:
-        # PARAM ::= MAXTHREE — vars are numeric (fact) so nothing extra to enforce here
+        # PARAM ::= MAXTHREE - vars are numeric (fact) so nothing extra to enforce here
         return
 
     def _check_body(self, body_node: Tuple) -> None:
@@ -283,7 +280,7 @@ class TypeAnalyserSpec:
         # MAXTHREE elements are VAR (numeric, fact)
         self._check_algo(algo)
 
-    # ---------- driver ----------
+    # driver
     def run(self) -> bool:
         if not (isinstance(self.ast, tuple) and self.ast and self.ast[0] == 'SPL_PROG'):
             self.errors.append("Type error: invalid AST")
@@ -295,7 +292,6 @@ class TypeAnalyserSpec:
         for pdef in procdefs:
             pname_node = pdef[1]
             pname = _nametext(pname_node)
-            # NAME typeless => must not be a variable name
             if pname in self.vars_all:
                 self.errors.append(
                     f"Type error: procedure name '{pname}' is not typeless (clashes with a variable) at line { _lin(pname_node) }"
@@ -326,15 +322,8 @@ class TypeAnalyserSpec:
 
         return not self.errors
 
-# ---------------------- public API ----------------------
-
+# PUBLIC FUNCS
 def analyze_types_spec(ast: Tuple, want_annotations: bool = False):
-    """
-    Run the type analyser. Returns:
-      - if want_annotations=False:  [list of error strings]
-      - if want_annotations=True:   (errors, node_type_dict)
-        where node_type_dict maps id(node) -> 'numeric'|'boolean'
-    """
     ta = TypeAnalyserSpec(ast)
     ta.run()
     if want_annotations:
@@ -342,9 +331,6 @@ def analyze_types_spec(ast: Tuple, want_annotations: bool = False):
     return ta.errors
 
 def print_types(ast: Any, node_types: Dict[int, str], indent: int = 0) -> None:
-    """
-    Pretty-print the AST, showing :: type on typed nodes and [line N] when available.
-    """
     if isinstance(ast, tuple):
         tag = ast[0]
         ty = node_types.get(id(ast))
