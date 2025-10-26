@@ -43,7 +43,7 @@ def compile_spl_to_basic(spl_src: str, start: int = 10, step: int = 10) -> str:
 if __name__ == "__main__":
     import sys, pathlib
     if len(sys.argv) < 2:
-        print("Usage: python basicify.py <input.spl> [output.bas]")
+        print("Usage: python basicify.py <input.txt> [output.bas]")
         sys.exit(1)
 
     inp = pathlib.Path(sys.argv[1])
