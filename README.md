@@ -1,5 +1,11 @@
 # COS341-Semester-Project
 
+## Team Members (Group 26)
+* Denis Woolley (u23528860)
+* Franco van der Westhuizen (u23543729)
+* Vansh Sood (u23534402)
+* Kabelo Mphafodi (u14046492)
+
 ## EXPLANATION
 * ```lexer.py``` - The lexer
 * ```parser.py``` - The parser
