@@ -1,0 +1,50 @@
+glob { 
+    counter 
+    result 
+}
+proc {
+    displaycounter ( ) {
+        local { }
+        print counter;
+        print "Current counter value"
+    }
+    
+    incrementcounter ( ) {
+        local { }
+        counter = ( counter plus 1 );
+        displaycounter ( )
+    }
+}
+func {
+    add ( x y ) {
+        local { sum }
+        sum = ( x plus y );
+        return sum
+    }
+    
+    multiply ( a b ) {
+        local { product }
+        product = ( a mult b );
+        return product
+    }
+}
+main {
+    var { 
+        num1 
+        num2 
+    }
+    counter = 0;
+    num1 = 5;
+    num2 = 3;
+    print "Starting program";
+    incrementcounter ( );
+    incrementcounter ( );
+    result = add ( num1 num2 );
+    print "Sum result:";
+    print result;
+    result = multiply ( num1 num2 );
+    print "Product result:";
+    print result;
+    print "Program complete";
+    halt
+}
