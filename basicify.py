@@ -1,8 +1,10 @@
+# Converts our intermediate code to BASIC code that we're going to run using pcbasic.py library
 from __future__ import annotations
 import re
 from typing import List, Tuple, Dict
 
-LABEL_RE = re.compile(r'^\s*REM\s+([A-Za-z_]\w*)\s*$')   # label line: REM Lx
+# Label and jumpiung patterns
+LABEL_RE = re.compile(r'^\s*REM\s+([A-Za-z_]\w*)\s*$')
 GOTO_RE  = re.compile(r'\bGOTO\s+([A-Za-z_]\w*)\b')
 THEN_RE  = re.compile(r'\bTHEN\s+([A-Za-z_]\w*)\b')
 
@@ -28,17 +30,16 @@ def intermediate_to_basic(inter_code: str, start: int = 10, step: int = 10) -> s
         out_lines.append(f"{num} {patched}")
     return "\n".join(out_lines)
 
-# SPL -> BASIC using the **inlined** generator
 def compile_spl_to_basic(spl_src: str, start: int = 10, step: int = 10) -> str:
     from parser import parse_spl
-    from codegen_inline import generate_code  # <-- inlined generator (no CALL)
+    from codegen_inline import generate_code
     ast = parse_spl(spl_src)
     if ast is None:
         raise ValueError("Parse failed; cannot generate BASIC.")
-    inter = generate_code(ast)  # inlined intermediate
+    inter = generate_code(ast)
     return intermediate_to_basic(inter, start=start, step=step)
 
-# CLI
+# Simple CLI to read SPL and write BASIC
 if __name__ == "__main__":
     import sys, pathlib
     if len(sys.argv) < 2:
@@ -49,7 +50,7 @@ if __name__ == "__main__":
     out = pathlib.Path(sys.argv[2]) if len(sys.argv) >= 3 else inp.with_suffix(".bas")
 
     src = inp.read_text(encoding="utf-8")
-    basic = compile_spl_to_basic(src)  # numbered BASIC from inlined intermediate
+    basic = compile_spl_to_basic(src)
     out.write_text(basic + "\n", encoding="utf-8")
     print(f"Wrote {out}:\n")
     print(basic)

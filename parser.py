@@ -1,6 +1,4 @@
-"""
-SPL Parser Implementation (with line numbers on leaves)
-"""
+# The parser will take the tokens generated from the Lexer and turn it into a typed AST
 
 from sly import Parser
 from lexer import SPLLexer
@@ -8,8 +6,10 @@ from lexer import SPLLexer
 __all__ = ['SPLParser', 'parse_spl', 'print_parse_tree']
 
 class SPLParser(Parser):
+    # Recognizes the same token names that the lexer exports
     tokens = SPLLexer.tokens
 
+    # Operator precedence so that we can do expression parsing
     precedence = (
         ('left', 'OR'),
         ('left', 'AND'),
@@ -21,7 +21,7 @@ class SPLParser(Parser):
 
     @staticmethod
     def _unpack(v):
-        # NAME/NUMBER/STRING tokens carry (value, lineno)
+        # Lexer stores NAME/NUMBER/STRING as (value, lineno)
         if isinstance(v, tuple) and len(v) == 2 and isinstance(v[1], int):
             return v[0], v[1]
         return v, None
@@ -39,7 +39,7 @@ class SPLParser(Parser):
     @_('var variables')
     def variables(self, p): return [p.var] + p.variables
 
-    # VAR & NAME (carry line numbers)
+    # VAR & NAME
     @_('NAME')
     def var(self, p):
         s, line = self._unpack(p.NAME)
@@ -244,10 +244,11 @@ class SPLParser(Parser):
         else:
             print("Syntax error at EOF")
 
-# -------- public helpers (TOP-LEVEL, not in __main__) --------
+
+# HELPERS
 
 def parse_spl(code: str):
-    """Parse SPL source code and return AST (or None on failure)."""
+    # Parse SPL source code and return AST (or None on failure).
     lexer = SPLLexer()
     parser = SPLParser()
     try:

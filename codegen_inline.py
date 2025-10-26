@@ -1,13 +1,13 @@
+# Intermediate code generation for the compiler that handles inlining because our previous one didn't :(
 from typing import Any, Dict, List, Tuple
 
-# ------- small AST helpers -------
+# small AST helpers
 def _varname(var_node: Tuple[str, str, int]) -> str:  # ('VAR', name, line)
     return var_node[1]
 
 def _nametext(name_node: Tuple[str, str, int]) -> str:  # ('NAME', name, line)
     return name_node[1]
 
-# ------- inlining codegen -------
 class InlineCodeGen:
     def __init__(self, ast: Tuple):
         self.ast = ast
@@ -29,8 +29,8 @@ class InlineCodeGen:
         for pdef in procdefs:
             # ('PDEF', name, param, body)
             pname = _nametext(pdef[1])
-            params = [_varname(v) for v in pdef[2][1]]          # ('PARAM', [VAR...])
-            locals_ = [_varname(v) for v in pdef[3][1]]         # ('BODY', locals, algo)
+            params = [_varname(v) for v in pdef[2][1]] # ('PARAM', [VAR...])
+            locals_ = [_varname(v) for v in pdef[3][1]] # ('BODY', locals, algo)
             algo = pdef[3][2]
             self.procs[pname] = dict(params=params, locals=locals_, algo=algo)
 
@@ -56,14 +56,14 @@ class InlineCodeGen:
 
     def fresh_var(self, base: str, kind: str) -> str:
         self._v += 1
-        return f"{kind}{self._v}{base}"  # BASIC-friendly
+        return f"{kind}{self._v}{base}"
 
-    # name mapping (params/locals → fresh)
+    # name mapping (params/locals -> fresh)
     def map_name(self, name: str) -> str:
         for mp in reversed(self.scope_stack):
             if name in mp:
                 return mp[name]
-        return name  # global/main
+        return name # global/main
 
     # atom/term to string (with mapping)
     def atom_to_str(self, atom: Tuple) -> str:
@@ -91,7 +91,6 @@ class InlineCodeGen:
             raise ValueError("Non-numeric BINOP used in numeric context")
         raise ValueError(f"Unknown TERM: {tag}")
 
-    # conditions: emit jump-to-true only; cascade for AND/OR/NOT
     def cond_goto_true(self, term: Tuple, true_lab: str) -> None:
         if term[0] == 'TERM_UNOP' and term[1] == 'NOT':
             self.cond_goto_false(term[2], true_lab)
@@ -112,7 +111,6 @@ class InlineCodeGen:
                 self.cond_goto_true(l, true_lab)
                 self.cond_goto_true(r, true_lab)
                 return
-        # anything else: treated as false (well-typed SPL won’t put numerics here)
 
     def cond_goto_false(self, term: Tuple, false_lab: str) -> None:
         if term[0] == 'TERM_UNOP' and term[1] == 'NOT':
@@ -138,7 +136,7 @@ class InlineCodeGen:
                 self.label(done)
                 return
 
-    # statements (with inlining)
+    # statements
     def gen_instr(self, instr: Tuple) -> None:
         tag = instr[0]
 
@@ -207,7 +205,6 @@ class InlineCodeGen:
             self.label(L_exit)
             return
 
-        # ---- inline calls ----
         if tag == 'INSTR_CALL':
             name_node, actuals = instr[1], instr[2]
             self._inline_proc(_nametext(name_node), actuals)
@@ -224,7 +221,6 @@ class InlineCodeGen:
         for instr in algo_list:
             self.gen_instr(instr)
 
-    # inlining helpers
     def _inline_proc(self, pname: str, actuals: List[Tuple]) -> None:
         info = self.procs.get(pname)
         if not info:

@@ -1,11 +1,14 @@
+# In the semantic analysis phase we assign node ID's/scopes, build the symbol table,
+# enforece name/scope rules, and we also do a simple
+
 from collections import defaultdict
 from typing import Any, Dict, List, Optional, Tuple, Set
 
+# Simple types for this phase
 Type = str  # 'int' | 'bool' | 'unknown'
 INT, BOOL, UNKNOWN = 'int', 'bool', 'unknown'
 
-# ---------- Utilities: node IDs over your tuple-based AST ----------
-
+# Node ID management
 class NodeIDs:
     """Assigns a unique integer ID to every tuple node in the AST."""
     def __init__(self) -> None:
@@ -46,21 +49,19 @@ class NodeIDs:
                 self.set_scope_recursive(child, scope)
 
 
-# ---------- Symbol structures ----------
-
+# Symbol structures
 class Symtab:
-    """
-    Program-wide symbol aggregates (indexed by names) plus per-declaration entries
-    keyed by node-id (foreign key).
-    """
+    # Program-wide symbol aggregates (indexed by names) plus per-declaration entries
+    # keyed by node-id (foreign key).
+    
     def __init__(self) -> None:
         # Declarations (name -> info)
         self.globals: Dict[str, Dict[str, Any]] = {}
-        self.procs: Dict[str, Dict[str, Any]] = {}   # params, local vars, body, node_id
-        self.funcs: Dict[str, Dict[str, Any]] = {}   # params, local vars, body, node_id
+        self.procs: Dict[str, Dict[str, Any]] = {} # params, local vars, body, node_id
+        self.funcs: Dict[str, Dict[str, Any]] = {} # params, local vars, body, node_id
         self.main: Dict[str, Any] = {'vars': set(), 'algo': None}
 
-        # All declared variable names across *all* scopes, to check "Everywhere" clashes
+        # All declared variable names across all scopes, to check "Everywhere" clashes
         self.all_var_names: Set[str] = set()
 
         # Per-variable declaration entry keyed by node-id
@@ -89,8 +90,7 @@ class Symtab:
         return "\n".join(lines)
 
 
-# ---------- Error collector ----------
-
+# Error collector
 class Errors:
     def __init__(self) -> None:
         self.items: List[str] = []
@@ -104,8 +104,7 @@ class Errors:
     def ok(self) -> bool:
         return not self.items
 
-# ---------- Helpers over your AST shape ----------
-
+# Helpers for AST shape
 def is_tag(node: Any, tag: str) -> bool:
     return isinstance(node, tuple) and node and node[0] == tag
 
@@ -128,10 +127,9 @@ def body_unpack(body_node: Tuple[str, List[Tuple[str, str]], List[Any]]) -> Tupl
     # ('BODY', locals_list, algo_list)
     return body_node[1], body_node[2]
 
-# ---------- Program collection + scope layout ----------
-
+# Program collection and scope layout 
 def assign_scopes_and_ids(ast: Tuple, ids: NodeIDs) -> None:
-    """Assign node IDs and scope labels per your SPL_PROG layout."""
+    # Assign node IDs and scope labels per SPL_PROG layout.
     ids.assign(ast, scope='Everywhere')
     if not is_tag(ast, 'SPL_PROG'):
         return
@@ -154,8 +152,7 @@ def assign_scopes_and_ids(ast: Tuple, ids: NodeIDs) -> None:
             fname = name_of_name_node(fdef[1])
             ids.set_scope_recursive(fdef, f"Local(func {fname})")
 
-# ---------- Uniqueness checks ----------
-
+# Uniqueness checks
 def check_unique(names: List[str], what: str, errs: Errors, where: str) -> None:
     seen = set()
     for n in names:
@@ -163,8 +160,7 @@ def check_unique(names: List[str], what: str, errs: Errors, where: str) -> None:
             errs.add(f"Name-rule violation: duplicate {what} '{n}' in {where}")
         seen.add(n)
 
-# ---------- Build symbols (globals, procs, funcs, main) ----------
-
+# Build symbols (globals, procs, funcs, main)
 def build_symbols(ast: Tuple, ids: NodeIDs, sym: Symtab, errs: Errors) -> None:
     if not is_tag(ast, 'SPL_PROG'):
         errs.add("Top node is not SPL_PROG")
@@ -222,7 +218,9 @@ def build_symbols(ast: Tuple, ids: NodeIDs, sym: Symtab, errs: Errors) -> None:
     for fdef in funcdefs:
         fname = name_of_name_node(fdef[1])
         fnames.append(fname)
+
     check_unique(fnames, 'function', errs, 'Function scope')
+
     for fdef in funcdefs:
         fname = name_of_name_node(fdef[1])
         nid = ids.id_of[id(fdef)]
@@ -233,17 +231,20 @@ def build_symbols(ast: Tuple, ids: NodeIDs, sym: Symtab, errs: Errors) -> None:
         # MAXTHREE uniqueness & shadow rules
         check_unique(params, f"parameter in func '{fname}'", errs, f"Local(func {fname})")
         check_unique(locals_names, f"local var in func '{fname}'", errs, f"Local(func {fname})")
+
         for n in locals_names:
             if n in params:
                 errs.add(f"Name-rule violation: local '{n}' shadows parameter in func '{fname}'")
         sym.funcs[fname] = {'node_id': nid, 'params': params, 'locals': set(locals_names),
                             'algo': body_algo, 'ret': ret_atom}
+        
         for v in param_list_from_param_node(fdef[2]):
             vnid = ids.id_of[id(v)]
             n = name_of_var_node(v)
             sym.var_decls_by_node[vnid] = {'name': n, 'decl_kind': 'param',
                                            'scope_label': f"Local(func {fname})", 'type': UNKNOWN}
             sym.all_var_names.add(n)
+        
         for v in body_locals:
             vnid = ids.id_of[id(v)]
             n = name_of_var_node(v)
@@ -277,20 +278,17 @@ def build_symbols(ast: Tuple, ids: NodeIDs, sym: Symtab, errs: Errors) -> None:
         errs.add(f"Everywhere-rule: function name '{n}' equals a procedure name")
 
 
-# ---------- Type & name resolution ----------
-
+# Type & name resolution
 class TypeChecker:
     def __init__(self, ids: NodeIDs, sym: Symtab, errs: Errors) -> None:
         self.ids, self.sym, self.errs = ids, sym, errs
         # types by decl node-id
         self.types: Dict[int, Type] = {}  # mirrors sym.var_decls_by_node[node_id]['type']
 
-    # --- Resolution by scope rules ---
+    # Resolution by scope rules
     def resolve_var(self, name: str, ctx: Dict[str, Any], usage_node: Tuple) -> Optional[int]:
-        """
-        Return decl node-id for a variable by SPL scope rules, else None (undeclared).
-        ctx: {'kind': 'proc'|'func'|'main', 'name': <id name>, 'params': set(), 'locals': set()}
-        """
+        #Return decl node-id for a variable by SPL scope rules, else None (undeclared).
+        # ctx: {'kind': 'proc'|'func'|'main', 'name': <id name>, 'params': set(), 'locals': set()}
         # Search order depends on scope
         if ctx['kind'] in ('proc', 'func'):
             if name in ctx['params']:
@@ -328,7 +326,7 @@ class TypeChecker:
             return
         self.sym.var_decls_by_node[decl_nid]['type'] = new
 
-    # --- Unification ---
+    # Unification
     @staticmethod
     def unify(a: Type, b: Type) -> Type:
         if a == b:
@@ -339,7 +337,7 @@ class TypeChecker:
             return a
         return 'error'
 
-    # --- Term/type evaluation ---
+    # Term/type evaluation
     def check_atom(self, atom: Tuple, ctx: Dict[str, Any]) -> Type:
         if is_tag(atom, 'ATOM_NUM'):
             return INT
@@ -349,7 +347,7 @@ class TypeChecker:
             decl_nid = self.resolve_var(name, ctx, var_node)
             if decl_nid is not None:
                 self.sym.usage_to_decl[self.ids.id_of[id(var_node)]] = decl_nid
-                # Use current known type (may be unknown)
+                # Use current known type (could be unknown)
                 return self.sym.var_decls_by_node[decl_nid]['type']
             return UNKNOWN
         return UNKNOWN
@@ -389,7 +387,7 @@ class TypeChecker:
 
         return UNKNOWN
 
-    # --- Algo/instruction checks + constraints ---
+    # Algo/instruction checks + constraints
     def expect_bool(self, term: Tuple, ctx: Dict[str, Any]) -> None:
         t = self.check_term(term, ctx)
         if t not in (BOOL, UNKNOWN):
@@ -404,7 +402,7 @@ class TypeChecker:
             if is_tag(out, 'OUTPUT_ATOM'):
                 self.check_atom(out[1], ctx)
             elif is_tag(out, 'OUTPUT_STRING'):
-                pass  # strings are fine
+                pass  # strings should be fine
             return
         if tag == 'INSTR_CALL':
             # procedure call: ('INSTR_CALL', name_node, args_list)
@@ -443,8 +441,6 @@ class TypeChecker:
                 for a in args:
                     if is_tag(a, 'ATOM_VAR') or is_tag(a, 'ATOM_NUM'):
                         self.check_atom(a, ctx)
-                # Return type unknown (no spec), so we can't constrain lhs beyond "some value"
-                # If you want: self.set_type(decl_nid, UNKNOWN)
             else:
                 # ('ASSIGN_TERM', var, term)
                 t = self.check_term(instr[2], ctx)
@@ -494,21 +490,15 @@ class TypeChecker:
                    'locals': set(info['locals']),
                    'scope_label': f"Local(func {name})"}
             self.check_algo(info['algo'], ctx)
-            # return expr must be consistent (we can infer but spec doesn't force type)
-            # If you want to type the return into a synthetic variable, do it here.
-        # Main
         ctx = {'kind': 'main', 'name': 'main', 'params': set(), 'locals': set(self.sym.main['vars']),
                'scope_label': 'Main'}
         self.check_algo(self.sym.main['algo'], ctx)
 
-
-# ---------- Public entry point ----------
-
+# Public entry point
 def analyze_semantics(parse_tree: Tuple) -> Tuple[Symtab, NodeIDs, Errors]:
-    """
-    Given the AST returned by your parser, build IDs & symbol table and run checks.
-    Returns (symtab, node_ids, errors)
-    """
+    # Given the AST returned by the parser, build IDs & symbol table and run checks.
+    # Returns (symtab, node_ids, errors)
+
     errs = Errors()
     ids = NodeIDs()
     sym = Symtab()
