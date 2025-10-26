@@ -1,6 +1,3 @@
-# codegen_inline.py
-# SPL → Intermediate (inlined, no CALL) so it runs after BASIC numbering.
-
 from typing import Any, Dict, List, Tuple
 
 # ------- small AST helpers -------
@@ -274,20 +271,3 @@ class InlineCodeGen:
 
 def generate_code(ast: Tuple) -> str:
     return InlineCodeGen(ast).gen()
-
-# convenience: CLI to dump inlined intermediate
-if __name__ == "__main__":
-    import sys, pathlib
-    from parser import parse_spl
-    if len(sys.argv) < 2:
-        print("Usage: python codegen_inline.py <input.spl> [output.ic.txt]")
-        sys.exit(1)
-    inp = pathlib.Path(sys.argv[1])
-    out = pathlib.Path(sys.argv[2]) if len(sys.argv) >= 3 else inp.with_suffix(".inlined.ic.txt")
-    src = inp.read_text(encoding="utf-8")
-    ast = parse_spl(src)
-    if ast is None:
-        print("Parse failed"); sys.exit(2)
-    code = generate_code(ast)
-    out.write_text(code + "\n", encoding="utf-8")
-    print(f"Wrote {out}")

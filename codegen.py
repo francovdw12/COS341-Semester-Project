@@ -1,25 +1,6 @@
-# codegen.py
-# COS341 SPL → Intermediate Code (spec-faithful)
-#
-# Assumptions from the spec:
-# - Scope analysis + consistent renaming already done (we keep names as-is).
-# - Symbol table is optional for codegen; declarations don't emit code.
-# - We emit "STOP", "PRINT", "IF ... THEN label", "GOTO label", and "REM label".
-# - CALL(...) is emitted for procedures/functions; inlining is a later phase.
-#
-# Public API:
-#   generate_code(ast) -> str
-#   write_code_to_file(ast, path) -> None
-#
-# Example:
-#   from parser import parse_spl
-#   from codegen import generate_code
-#   code = generate_code(parse_spl(source_text))
-#   print(code)
-
 from typing import Any, List, Tuple, Optional
 
-# ----------------- tiny helpers to read your AST -----------------
+# ----------------- tiny helpers to read the AST -----------------
 
 def _lin(node: Any) -> Optional[int]:
     if isinstance(node, tuple):
@@ -316,25 +297,3 @@ def write_code_to_file(ast: Tuple, path: str) -> None:
     code = generate_code(ast)
     with open(path, "w", encoding="utf-8") as f:
         f.write(code + "\n")
-
-# ----------------- demo -----------------
-if __name__ == "__main__":
-    import sys, pathlib
-    from parser import parse_spl
-
-    if len(sys.argv) < 2:
-        print("Usage: python codegen.py <input.spl> [output.ic.txt]")
-        sys.exit(1)
-
-    inp = pathlib.Path(sys.argv[1])
-    out = pathlib.Path(sys.argv[2]) if len(sys.argv) >= 3 else inp.with_suffix(".ic.txt")
-
-    src = inp.read_text(encoding="utf-8")
-    ast = parse_spl(src)
-    if ast is None:
-        print("Parse failed")
-        sys.exit(2)
-
-    code = generate_code(ast)
-    out.write_text(code + "\n", encoding="utf-8")
-    print(f"Wrote {out}")

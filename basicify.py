@@ -1,6 +1,3 @@
-# basicify.py
-# Final Phase: Intermediate (from inlined codegen) → Executable BASIC (line-numbered)
-
 from __future__ import annotations
 import re
 from typing import List, Tuple, Dict

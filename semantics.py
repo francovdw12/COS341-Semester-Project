@@ -1,7 +1,3 @@
-# semantics.py
-# Static semantics (scoping + basic type checks) for SPL
-# Works with your existing lexer/parser that returns a nested tuple/list AST.
-
 from collections import defaultdict
 from typing import Any, Dict, List, Optional, Tuple, Set
 
@@ -528,36 +524,3 @@ def analyze_semantics(parse_tree: Tuple) -> Tuple[Symtab, NodeIDs, Errors]:
     tc.run(parse_tree)
 
     return sym, ids, errs
-
-
-# ---------- Minimal CLI test (optional) ----------
-
-if __name__ == "__main__":
-    from parser import parse_spl, print_parse_tree  # your existing module names
-
-    code = """
-    glob { x y }
-    proc {
-      foo(a) { local { t } print a; t = ( (5 PLUS 3) ); }   // invalid term (needs parentheses with binops)
-    }
-    func {
-      sum(a b) { local { r } r = ( (a plus b) ); return r }
-    }
-    main {
-      var { counter }
-      counter = 5;
-      print counter;
-      halt
-    }
-    """
-    tree = parse_spl(code)
-    if tree:
-        sym, ids, errs = analyze_semantics(tree)
-        print("---- SYMBOL TABLE ----")
-        print(sym.snapshot())
-        print("\n---- ERRORS ----")
-        if errs.ok():
-            print("No semantic errors.")
-        else:
-            for e in errs.items:
-                print("*", e)

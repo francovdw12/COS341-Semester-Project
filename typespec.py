@@ -1,18 +1,3 @@
-# typespec.py
-# Syntax-based TYPE ANALYSIS for SPL (per COS341 worksheet)
-# - Reports type errors
-# - (Optional) annotates AST nodes with inferred kinds ('numeric' | 'boolean')
-#
-# Works with your AST shape (with line numbers on leaves) produced by parser.py:
-#   ('VAR', name, line)
-#   ('NAME', name, line)
-#   ('ATOM_NUM', value, line)
-#   ('ATOM_VAR', ('VAR', name, line))
-#   ('TERM_ATOM', atom)
-#   ('TERM_UNOP', op, term)           # op in {'NEG','NOT'}
-#   ('TERM_BINOP', termL, op, termR)  # op in {'PLUS','MINUS','MULT','DIV','AND','OR','EQ','GT'}
-#   INSTR nodes: see _check_instr below.
-
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 NUM, BOOL = 'numeric', 'boolean'
@@ -381,44 +366,3 @@ def print_types(ast: Any, node_types: Dict[int, str], indent: int = 0) -> None:
         print("  " * indent + "]")
     else:
         print("  " * indent + repr(ast))
-
-# ---------------------- demo (optional) ----------------------
-if __name__ == "__main__":
-    from parser import parse_spl
-
-    sample = r'''
-    glob { g1 g2 }
-    proc {
-      show ( a ) {
-        local { tmp }
-        print a
-      }
-    }
-    func {
-      add ( x y ) {
-        local { r }
-        r = ( x plus y );
-        return r
-      }
-    }
-    main {
-      var { m }
-      m = ( m plus g1 );
-      show ( m );
-      if ( m > 0 ) { print "ok" } else { halt };
-      halt
-    }
-    '''
-    ast = parse_spl(sample)
-    if ast is None:
-        print("Parse failed")
-    else:
-        errs, ann = analyze_types_spec(ast, want_annotations=True)
-        if errs:
-            print("TYPE ERRORS:")
-            for e in errs:
-                print(" -", e)
-        else:
-            print("✓ Program is correctly typed.\n")
-        print("=== Typed AST ===")
-        print_types(ast, ann)
