@@ -8,7 +8,12 @@
 * ```codegen.py``` - Intermediate code generation (but this one had an issue with CALL statements).
 * ```codegen_inline.py``` - Intermediate code generation (but with no problems as far as I know).
 * ```basicify.py``` - The conversion from intermediate code to BASIC code.
+
 * ```input.spl``` - The SPL code you want to compile (using the commands below)
+* ```program.bas``` - Generated BASIC code output from basicify.py
+* ```program.out.txt``` - Final execution output from running the BASIC program
+
+* ```/tests``` - Test suite containing all test files for the compiler components 
 
 
 ## HOW TO RUN:
