@@ -138,7 +138,7 @@
                 count 
             }
             result = 1;
-            count = 0;
+            count = exp;
             while ( count > 0 ) {
                 result = ( result mult base );
                 count = ( count minus 1 )
