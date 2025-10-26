@@ -3,6 +3,9 @@ Test suite for SPL Lexer and Parser
 Simple tests for commit-ready verification
 """
 
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from lexer import SPLLexer
 from parser import parse_spl
 

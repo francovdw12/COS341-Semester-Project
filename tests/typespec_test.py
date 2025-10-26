@@ -1,7 +1,6 @@
-# typespec_test.py
-# Tests for SPL syntax-based type analysis (per worksheet).
-# Requires: parser.py (with parse_spl) and typespec.py (with analyze_types_spec)
-
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from parser import parse_spl
 from typespec import analyze_types_spec
 
@@ -14,7 +13,6 @@ def run(name: str, program: str, should_type_ok: bool = True):
     TOTAL += 1
     ast = parse_spl(program)
     if ast is None:
-        # We require parse success for both positive and negative tests.
         print(f"[FAIL] {name}  — parse failed (wanted {'type OK' if should_type_ok else 'type FAIL'})")
         return
     errors = analyze_types_spec(ast)
@@ -62,7 +60,7 @@ main {
 }
 """, should_type_ok=True)
 
-# 3) Proc + Func + proper arity; types OK
+# 3) Proc + Func + proper arity, types OK
 run("Proc & Func arity OK", r"""
 glob { }
 proc {

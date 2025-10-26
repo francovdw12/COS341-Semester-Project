@@ -1,4 +1,7 @@
 # Integration Tests for SPL Compiler
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from parser import parse_spl
 
 def test(name, code, should_pass=True):
