@@ -9,7 +9,7 @@
 * ```codegen_inline.py``` - Intermediate code generation (but with no problems as far as I know).
 * ```basicify.py``` - The conversion from intermediate code to BASIC code.
 
-* ```input.spl``` - The SPL code you want to compile (using the commands below)
+* ```input.txt``` - The SPL code you want to compile (using the commands below)
 * ```program.bas``` - Generated BASIC code output from basicify.py
 * ```program.out.txt``` - Final execution output from running the BASIC program
 
@@ -18,8 +18,8 @@
 
 ## HOW TO RUN:
 
-(Run basicify.py with Python. input.spl is the student language you want to compile. program.bas is the output (BASIC code))
-```python basicify.py input.spl program.bas```
+(Run basicify.py with Python. input.txt is the student language you want to compile. program.bas is the output (BASIC code))
+```python basicify.py input.txt program.bas```
 
 (This one you need to pip install the pcbasic thing - this will take the program.bas BASIC code and run it and put the output in program.out.txt)
 ```pcbasic --run=program.bas --output=program.out.txt --quit```
