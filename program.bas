@@ -87,7 +87,7 @@
 870 P31base = 2
 880 P32exp = 3
 890 L33result = 1
-900 L34count = P32exp
+900 L34count = 0
 910 REM W0008
 920 IF L34count > 0 THEN 940
 930 GOTO 980
